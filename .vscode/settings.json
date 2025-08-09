@@ -1,0 +1,14 @@
+{
+  "files.associations": {
+    "*.dbclient-js": "javascript",
+    "*.embeddedhtml": "html",
+    "*.vue": "vue",
+    "*.wpy": "vue",
+    "*.wxml": "html",
+    "*.wxss": "css",
+    "winaudio.h": "c",
+    "miniaudio.h": "c",
+    "stdio.h": "c",
+    "saudio.h": "c"
+  }
+}

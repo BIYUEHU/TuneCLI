@@ -1,0 +1,4 @@
+module SAudio {
+    header "saudio.h"
+    export *
+}

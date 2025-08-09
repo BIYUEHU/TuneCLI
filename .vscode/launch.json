@@ -1,0 +1,40 @@
+{
+  "configurations": [
+    {
+      "type": "swift",
+      "request": "launch",
+      "args": [],
+      "cwd": "${workspaceFolder:tune-cli}",
+      "name": "Debug TuneCLI",
+      "program": "${workspaceFolder:tune-cli}/.build/debug/TuneCLI",
+      "preLaunchTask": "swift: Build Debug TuneCLI"
+    },
+    {
+      "type": "swift",
+      "request": "launch",
+      "args": [],
+      "cwd": "${workspaceFolder:tune-cli}",
+      "name": "Release TuneCLI",
+      "program": "${workspaceFolder:tune-cli}/.build/release/TuneCLI",
+      "preLaunchTask": "swift: Build Release TuneCLI"
+    },
+    {
+      "type": "swift",
+      "request": "launch",
+      "args": [],
+      "cwd": "${workspaceFolder:tune-cli}",
+      "name": "Debug SAudio",
+      "program": "${workspaceFolder:tune-cli}/.build/debug/SAudio",
+      "preLaunchTask": "swift: Build Debug SAudio"
+    },
+    {
+      "type": "swift",
+      "request": "launch",
+      "args": [],
+      "cwd": "${workspaceFolder:tune-cli}",
+      "name": "Release SAudio",
+      "program": "${workspaceFolder:tune-cli}/.build/release/SAudio",
+      "preLaunchTask": "swift: Build Release SAudio"
+    }
+  ]
+}
