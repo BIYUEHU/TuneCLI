@@ -21,9 +21,7 @@ class ListView: UIComponent {
       let prefix = isSelected ? "► " : "  "
       let text = prefix + items[i]
       // let maxWidth = frame.size.width - prefix.count
-      let displayText = String(text.prefix(frame.size.width))
-
-      buffer.drawText(displayText, at: Point(x: frame.minX, y: y))
+      buffer.drawText(String(text.prefix(frame.size.width)), at: Point(x: frame.minX, y: y))
     }
   }
 

@@ -8,23 +8,32 @@ int main(int argc, char **argv)
         printf("Usage: %s <audio file>\n", argv[0]);
         return -1;
     }
+    printf("221");
 
-    saudio *audio = saudio_load(argv[1]);
+    saudio_init();
+
+    ma_sound *audio = saudio_load(argv[1]);
     if (audio == NULL)
     {
         printf("Failed to play audio file: %s\n", argv[1]);
-        saudio_uninit(audio);
         return -3;
     }
 
-    float seconds = saudio_get_total_seconds(audio);
-    printf("Audio file length: %.2f seconds\n", seconds);
+    printf("1");
+
+    // float seconds = saudio_get_total_seconds(audio);
+    // printf("Audio file length: %.2f seconds\n", seconds);
 
     saudio_play(audio);
     printf("Playing %s\n", argv[1]);
     printf("Press Enter to seek to 10 seconds...\n");
     getchar();
     saudio_seek(audio, 200.0f);
+
+    printf("Press Enter to restart...\n");
+    getchar();
+    // saudio_reset(audio);
+    saudio_seek(audio, 0.0f);
 
     printf("Press Enter to pause...\n");
     getchar();

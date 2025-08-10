@@ -2,52 +2,63 @@ import WinSDK
 
 class KeyboardListener {
   private var isListening = false
-  private var keyHandlers: [(WindowsKey, () -> Void)] = []
   private var anyKeyHandlers: [(String) -> Void] = []
 
   private func readWindowsKey() -> String? {
-    var input: INPUT_RECORD = INPUT_RECORD()
-    var count = DWORD(0)
-    if !ReadConsoleInputW(GetStdHandle(STD_INPUT_HANDLE), &input, 1, &count) {
+    let hStdin = GetStdHandle(STD_INPUT_HANDLE)
+    if hStdin == INVALID_HANDLE_VALUE {
       return nil
     }
-    if input.EventType == KEY_EVENT && input.Event.KeyEvent.bKeyDown.boolValue {
+
+    var input = INPUT_RECORD()
+    var count: DWORD = 0
+
+    if !ReadConsoleInputW(hStdin, &input, 1, &count) || count == 0 {
+      return nil
+    }
+
+    // 只在按下瞬间返回，不考虑长按、功能键、鼠标
+    if input.EventType == KEY_EVENT && input.Event.KeyEvent.bKeyDown.boolValue
+      && input.Event.KeyEvent.uChar.UnicodeChar != 0
+    {
       return String(input.Event.KeyEvent.uChar.UnicodeChar)
     }
+
     return nil
   }
 
-  func on(key: WindowsKey, callback: @escaping () -> Void) {
-    keyHandlers.append((key, callback))
+  private func hasInputAvailable() -> Bool {
+    let hStdin = GetStdHandle(STD_INPUT_HANDLE)
+    if hStdin == INVALID_HANDLE_VALUE {
+      return false
+    }
+
+    var numberOfEvents: DWORD = 0
+    if !GetNumberOfConsoleInputEvents(hStdin, &numberOfEvents) {
+      return false
+    }
+
+    return numberOfEvents > 0
+  }
+
+  func readNonBlocking() -> String? {
+    // 先检查是否有输入可用
+    guard hasInputAvailable() else { return nil }
+
+    // 有输入时才读取
+    return readWindowsKey()
   }
 
   func onAny(callback: @escaping (String) -> Void) {
     anyKeyHandlers.append(callback)
   }
 
-  func start() {
-    isListening = true
-
-    // Task {
-    while isListening {
-      if let key = readWindowsKey() {
-        for c in anyKeyHandlers {
-          c(key)
-        }
-        for (k, c) in keyHandlers {
-          if key == k.rawValue {
-            c()
-          }
-        }
+  func read() {
+    if let key = readWindowsKey() {
+      for c in anyKeyHandlers {
+        c(key)
       }
-      // try await Task.sleep(nanoseconds: 16_666_667)  // ~60fps
     }
-    // }
-  }
-
-  func stop() {
-    isListening = false
-    // restoreTerminal()
   }
 }
 enum WindowsKey: String {

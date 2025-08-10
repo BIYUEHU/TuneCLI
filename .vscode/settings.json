@@ -9,6 +9,7 @@
     "winaudio.h": "c",
     "miniaudio.h": "c",
     "stdio.h": "c",
-    "saudio.h": "c"
+    "saudio.h": "c",
+    "cstdlib": "c"
   }
 }
