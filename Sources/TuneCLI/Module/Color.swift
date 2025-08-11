@@ -1,5 +1,3 @@
-import Foundation
-
 struct ANSIColors {
   static let reset = "\u{001B}[0m"
 
@@ -12,11 +10,11 @@ struct ANSIColors {
   static let cyan = "\u{001B}[36m"
   static let white = "\u{001B}[37m"
 
-  static let lightBlack = "\u{001B}[90m"  // 灰色
+  static let lightBlack = "\u{001B}[90m"
   static let lightRed = "\u{001B}[91m"
   static let lightGreen = "\u{001B}[92m"
   static let lightYellow = "\u{001B}[93m"
-  static let lightBlue = "\u{001B}[94m"  // 你要的浅蓝色！
+  static let lightBlue = "\u{001B}[94m"
   static let lightMagenta = "\u{001B}[95m"
   static let lightCyan = "\u{001B}[96m"
   static let lightWhite = "\u{001B}[97m"
@@ -48,6 +46,8 @@ struct ANSIColors {
   static let strikethrough = "\u{001B}[9m"
 }
 extension String {
+  var reset: String { ANSIColors.reset + self + ANSIColors.reset }
+
   var black: String { ANSIColors.black + self + ANSIColors.reset }
   var red: String { ANSIColors.red + self + ANSIColors.reset }
   var green: String { ANSIColors.green + self + ANSIColors.reset }

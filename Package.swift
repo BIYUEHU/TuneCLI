@@ -20,6 +20,11 @@ let package = Package(
             dependencies: [
                 .product(name: "ArgumentParser", package: "swift-argument-parser"),
                 "SAudio",
-            ]),
+            ],
+            resources: [
+                .copy("Resources/tune.ico"),
+                .copy("Resources/tune.png")
+            ]
+        ),
     ]
 )

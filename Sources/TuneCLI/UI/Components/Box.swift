@@ -7,6 +7,7 @@ class Box: UIComponent {
     case single
     case double
     case rounded
+    case blank
 
     var chars:
       (
@@ -21,6 +22,8 @@ class Box: UIComponent {
         return ("╔", "╗", "╚", "╝", "═", "║")
       case .rounded:
         return ("╭", "╮", "╰", "╯", "─", "│")
+      case .blank:
+        return (" ", " ", " ", " ", " ", " ")
       }
     }
   }

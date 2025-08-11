@@ -1,3 +1,5 @@
+import Foundation
+
 import SAudio
 
 struct SongStatus {
@@ -11,6 +13,8 @@ class Song: Equatable {
   private var playDate: Double? = nil
 
   private var alreadyPlayTime: Double = 0
+
+  private let lyrics: Lyrics
 
   let path: String
 
@@ -31,6 +35,11 @@ class Song: Equatable {
     return alreadyPlayTime
   }
 
+  var currentLyrics: Lyrics {
+    let time = currentSeconds
+    return lyrics.filter { lyric in time >= lyric.startTime && time < lyric.endTime }
+  }
+
   init(path: String) {
     audio = saudio_load(path)
     if audio == nil {
@@ -38,6 +47,18 @@ class Song: Equatable {
     }
     totalSeconds = Double(saudio_get_total_seconds(saudio_get_status(audio)))
     self.path = path
+
+    self.lyrics =
+      if let lryics = try? String(
+        contentsOfFile:
+          path.replacingOccurrences(
+            of: "." + AUDIO_FILE_EXTENSION, with: "." + LRYIC_FILE_EXTENSION,
+            options: .regularExpression), encoding: .utf8)
+      {
+        parseLyrics(lrcContent: lryics)
+      } else {
+        []
+      }
   }
 
   func play() {
@@ -62,8 +83,11 @@ class Song: Equatable {
   }
 
   func seek(to seconds: Double) {
-    if seconds < 0 || seconds > totalSeconds {
-      return
+    if seconds < 0 {
+      return seek(to: 0)
+    }
+    if seconds > totalSeconds {
+      return seek(to: totalSeconds)
     }
 
     alreadyPlayTime = seconds
@@ -79,8 +103,8 @@ class Song: Equatable {
     playDate = nil
   }
 
-  func setVolume(to volume: Float) {
-    saudio_set_volume(audio, volume)
+  func setVolume(to volume: Double) {
+    saudio_set_volume(audio, Float(volume))
   }
 
   deinit {

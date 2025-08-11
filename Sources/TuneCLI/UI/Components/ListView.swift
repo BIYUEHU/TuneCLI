@@ -19,9 +19,12 @@ class ListView: UIComponent {
       let y = frame.minY + (i - scrollOffset)
       let isSelected = i == selectedIndex
       let prefix = isSelected ? "► " : "  "
-      let text = prefix + items[i]
+      var text = String((prefix + items[i]).prefix(frame.size.width))
+      if isSelected {
+        text = text.lightCyan
+      }
       // let maxWidth = frame.size.width - prefix.count
-      buffer.drawText(String(text.prefix(frame.size.width)), at: Point(x: frame.minX, y: y))
+      buffer.drawText(text, at: Point(x: frame.minX, y: y))
     }
   }
 

@@ -5,7 +5,7 @@ class Console {
     var csbi = CONSOLE_SCREEN_BUFFER_INFO()
     GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi)
     return Size(
-      width: Int(csbi.srWindow.Right - csbi.srWindow.Left + 1),
+      width: max(Int(csbi.srWindow.Right - csbi.srWindow.Left + 1), 60),
       height: Int(csbi.srWindow.Bottom - csbi.srWindow.Top + 1))
   }
 

@@ -17,7 +17,6 @@ class KeyboardListener {
       return nil
     }
 
-    // 只在按下瞬间返回，不考虑长按、功能键、鼠标
     if input.EventType == KEY_EVENT && input.Event.KeyEvent.bKeyDown.boolValue
       && input.Event.KeyEvent.uChar.UnicodeChar != 0
     {
@@ -42,10 +41,7 @@ class KeyboardListener {
   }
 
   func readNonBlocking() -> String? {
-    // 先检查是否有输入可用
     guard hasInputAvailable() else { return nil }
-
-    // 有输入时才读取
     return readWindowsKey()
   }
 

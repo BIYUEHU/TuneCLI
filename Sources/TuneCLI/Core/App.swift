@@ -2,19 +2,23 @@ import Foundation
 
 import SAudio
 
+struct TuneCLIAppOptions {
+  let songList: [String]
+  let directory: String
+  let mode: MusicPlayingMode?
+}
 class TuneCLIApp: @unchecked Sendable {
   private let musicManager: MusicManager
   private let keyboardListener = KeyboardListener()
   private let ui = UI()
 
-  init(songList: [String]) {
+  init(options: TuneCLIAppOptions) {
     if saudio_init() != 1 {
       fatalError("Failed to initialize audio engine")
     }
 
-    self.musicManager = MusicManager(
-      songList: songList.map { Song(path: AUDIO_DIRECTORY + "/" + $0) })
-    self.ui.playlist.items = songList
+    self.musicManager = MusicManager(options: options)
+    self.ui.playlist.items = options.songList.map { getAudioFilename(filename: $0) }
 
     keyboardListener.onAny {
       if let key = WindowsKey(rawValue: $0) {
@@ -24,6 +28,8 @@ class TuneCLIApp: @unchecked Sendable {
   }
 
   func run() {
+    ui.load()
+
     updateSongLabel()
     updateInfoLabel()
     ui.render()
@@ -48,26 +54,44 @@ class TuneCLIApp: @unchecked Sendable {
       musicManager.playNext()
       updateSongLabel()
     case .Space:
-      musicManager.togglePlay()
+      musicManager.currentSong.toggle()
+      updateSongLabel()
+    case .Enter:
+      musicManager.play(at: self.ui.playlist.selectedIndex)
       updateSongLabel()
     case .q:
+      musicManager.currentSong.pause()
+      ui.clear()
+      ui.render()
+      Thread.sleep(forTimeInterval: 0.3)
+      print("Good bye~".cyan)
+      Thread.sleep(forTimeInterval: 0.9)
       exit(0)
     case .k:
       updateplaylist(isDown: false)
     case .j:
       updateplaylist(isDown: true)
     case .h:
-      musicManager.upVolume()
+      musicManager.volume += 0.01
       updateInfoLabel()
     case .l:
-      musicManager.downVolume()
+      musicManager.volume -= 0.01
       updateInfoLabel()
     case .r:
-      musicManager.toggleMode()
+      musicManager.playingMode = musicManager.playingMode.next()
       updateInfoLabel()
-    case .Enter:
-      musicManager.play(at: self.ui.playlist.selectedIndex)
-      updateSongLabel()
+    case .w:
+      musicManager.seek(seconds: 2)
+      updateInfoLabel()
+    case .s:
+      musicManager.seek(seconds: -2)
+      updateInfoLabel()
+    case .a:
+      musicManager.seek(seconds: 10)
+      updateInfoLabel()
+    case .d:
+      musicManager.seek(seconds: -10)
+      updateInfoLabel()
     default:
       return
     }
@@ -75,45 +99,65 @@ class TuneCLIApp: @unchecked Sendable {
   }
 
   private func updateProgressBar() {
-    let song = musicManager.currentSong
-    if song.isPlaying {
-      ui.progressBar.progress =
-        song.currentSeconds / song.totalSeconds
-      updateInfoLabel()
+    let progress = musicManager.currentSong.currentSeconds / musicManager.currentSong.totalSeconds
+    if progress == ui.progressBar.progress {
+      return
     }
+    ui.progressBar.progress = progress
+    updateInfoLabel()
   }
 
   private func updateInfoLabel() {
-    let song = musicManager.currentSong
-
-    if song.currentSeconds >= song.totalSeconds {
+    if musicManager.currentSong.currentSeconds >= musicManager.currentSong.totalSeconds {
       musicManager.autoSwitch()
       updateSongLabel()
-      updateInfoLabel()
-      return
     }
 
-    ui.infoLabel.text = "📢: \(Int(musicManager.volume * 100))".bold.yellow
+    ui.infoLabel.text = "🔊: \(Int(musicManager.volume * 100))".yellow
     ui.infoLabel.text += " | "
     ui.infoLabel.text +=
-      "🕒: \(formatSeconds(seconds: song.currentSeconds))/\(formatSeconds(seconds: song.totalSeconds))"
-      .bold.green
+      "🕒: \(formatSeconds(seconds: musicManager.currentSong.currentSeconds))/\(formatSeconds(seconds: musicManager.currentSong.totalSeconds))"
+      .magenta
     ui.infoLabel.text += " | "
-    ui.infoLabel.text += "🔊: \(musicManager.playingMode)".bold.blue
-    ui.render()
+    ui.infoLabel.text += "📼: \(musicManager.playingMode)"
+    ui.infoLabel.text += "".reset
 
+    let lyrics = musicManager.currentSong.currentLyrics
+    switch lyrics.count {
+    case 0:
+      ui.lyric1.text = ""
+      ui.lyric2.text = ""
+      ui.lyric3.text = ""
+      break
+    case 1:
+      ui.lyric1.text = lyrics[0].content.red
+      ui.lyric2.text = ""
+      ui.lyric3.text = ""
+      break
+    case 2:
+      ui.lyric1.text = lyrics[0].content.red
+      ui.lyric2.text = lyrics[1].content.yellow
+      ui.lyric3.text = ""
+      break
+    default:
+      ui.lyric1.text = lyrics[0].content.red
+      ui.lyric2.text = lyrics[1].content.yellow
+      ui.lyric3.text = lyrics[2].content.green
+      break
+    }
+
+    ui.render()
   }
 
   private func updateSongLabel() {
     ui.songLabel.text =
       if musicManager.currentSong.isPlaying {
-        "🎵 Play "
+        "🎵 Playing ".lightGreen
       } else {
-        "🎵 Pause "
+        "🎵 Paused ".lightRed
       }
-    ui.songLabel.text += "\(musicManager.currentSong.name)"
+    ui.songLabel.text += getAudioFilename(filename: musicManager.currentSong.name).underline
     ui.render()
-
     // ui.songLabel.text = "🙅 No Song playing"
   }
 
@@ -129,5 +173,4 @@ class TuneCLIApp: @unchecked Sendable {
         currentIndex + (isDown ? 1 : -1)
       }
   }
-
 }

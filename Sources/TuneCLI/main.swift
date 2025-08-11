@@ -1,19 +1,38 @@
 import ArgumentParser
 
-struct SwiftTune: ParsableCommand {
-  @Argument(help: "音乐目录")
-  var directory: String = "."
+struct TuneCLI: ParsableCommand {
+  static let configuration = CommandConfiguration(
+    commandName: "TuneCLI",
+    abstract: AppInfo.description,
+    version: AppInfo.version
+  )
 
-  @Flag(help: "随机播放")
-  var shuffle: Bool = false
+  @Argument(help: "audio directory")
+  var directory: String = "./audio"
+
+  @Flag(help: "repeat all the songs")
+  var mode: MusicPlayingMode?
 
   func run() throws {
+    if directory.isEmpty {
+      print("Please provide a valid directory".red)
+      return
+    }
 
-    let (audioFiles, _) = initDirectory()
+    let directory = self.directory.last! == "/" ? self.directory : "\(self.directory)/"
 
-    let application = TuneCLIApp(songList: audioFiles)
-    application.run()
+    let (audioFiles, _) = initDirectory(directory: directory)
+
+    if audioFiles.isEmpty {
+      print("No audio files found in the directory \(directory)".red)
+      return
+    }
+
+    TuneCLIApp(
+      options: TuneCLIAppOptions(songList: audioFiles, directory: directory, mode: mode)
+    )
+    .run()
   }
 }
 
-SwiftTune.main()
+TuneCLI.main()
