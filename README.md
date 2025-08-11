@@ -18,6 +18,10 @@
 - 🚀 Built with Swift for Performance
 - 🎨 Modern Terminal UI with Colors and Animations
 
+## Screenshot
+
+![screenshot](Screenshot/img.png)
+
 ## Usage
 
 - Download from [Releases](https://github.com/biyuehu/TuneCLI/releases)
